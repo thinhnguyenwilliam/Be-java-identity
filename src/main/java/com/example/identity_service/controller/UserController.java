@@ -1,10 +1,12 @@
 package com.example.identity_service.controller;
 
 import com.example.identity_service.dto.request.UserCreationRequest;
+import com.example.identity_service.dto.request.UserUpdateRequest;
 import com.example.identity_service.model.User;
-import com.example.identity_service.service.UserService;
+import com.example.identity_service.service.IUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +19,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserController
 {
-    private final UserService userService;
+    private final IUserService userService;
 
 
     @PostMapping
@@ -39,4 +41,34 @@ public class UserController
     {
         return userService.getUserById(id);
     }
+
+
+    @PutMapping("/{id}")
+    public User updateUser(
+            @PathVariable UUID id,
+            @Valid @RequestBody UserUpdateRequest request)
+    {
+        return userService.updateUser(id, request);
+    }
+
+
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<Void> deleteUser(@PathVariable UUID id)
+//    {
+//        // Call the service to delete the user
+//        userService.deleteUser(id);
+//
+//        // Return a 204 No Content status to indicate successful deletion
+//        return ResponseEntity.noContent().build();
+//    }
+
+
+    @DeleteMapping("/{ids}")
+    public ResponseEntity<Void> deleteUsers(@PathVariable List<UUID> ids)
+    {
+        userService.deleteUsers(ids);
+        return ResponseEntity.noContent().build();
+    }
+
+
 }
