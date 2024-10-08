@@ -20,7 +20,7 @@ public class GlobalExceptionHandler
     public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException ex)
     {
         ErrorResponse errorResponse = new ErrorResponse(
-                ex.getMessage(),  // The exception message from UserNotFoundException
+                ex.getMessage(),  
                 "The requested user does not exist ID"
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
@@ -30,7 +30,7 @@ public class GlobalExceptionHandler
     public ResponseEntity<ErrorResponse> handleUsernameAlreadyExists(UsernameAlreadyExistsException ex)
     {
         ErrorResponse errorResponse = new ErrorResponse(
-                ex.getMessage(),  // The exception message from UserNotFoundException
+                ex.getMessage(),  
                 "tài khoản đã có sẵn"
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT); // 409 Conflict
