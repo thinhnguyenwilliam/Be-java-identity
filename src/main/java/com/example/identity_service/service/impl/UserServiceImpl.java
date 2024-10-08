@@ -3,6 +3,7 @@ package com.example.identity_service.service.impl;
 import com.example.identity_service.dto.request.UserCreationRequest;
 import com.example.identity_service.dto.request.UserUpdateRequest;
 import com.example.identity_service.exception.UserNotFoundException;
+import com.example.identity_service.exception.UsernameAlreadyExistsException;
 import com.example.identity_service.model.User;
 import com.example.identity_service.repository.UserRepository;
 import com.example.identity_service.service.IUserService;
@@ -11,6 +12,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 
@@ -24,7 +26,17 @@ public class UserServiceImpl implements IUserService
 
 
     @Override
-    public User createUser(UserCreationRequest request) {
+    public User createUser(UserCreationRequest request)
+    {
+
+        if (userRepository.existsByUsername(request.getUsername()))
+        {
+            throw new UsernameAlreadyExistsException(
+                    String.format("Username '%s' is already taken.", request.getUsername())
+            );
+        }
+
+
         // Map the UserCreationRequest DTO to the User entity
         User user = modelMapper.map(request, User.class);
         return userRepository.save(user);
@@ -40,6 +52,9 @@ public class UserServiceImpl implements IUserService
         return userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
+
+
+
 
     @Override
     public User updateUser(UUID id, UserUpdateRequest request) {

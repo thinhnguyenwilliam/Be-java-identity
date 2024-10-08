@@ -1,13 +1,14 @@
 package com.example.identity_service.repository;
 
 import com.example.identity_service.model.User;
+import com.example.identity_service.repository.custom.UserRepositoryCustom;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
-@Repository
-public interface UserRepository extends JpaRepository<User, UUID>
-{
 
+public interface UserRepository extends JpaRepository<User, UUID>, UserRepositoryCustom
+{
+    boolean existsByUsername(String username);
 }
