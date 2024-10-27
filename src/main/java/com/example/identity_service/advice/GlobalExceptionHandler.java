@@ -20,10 +20,28 @@ public class GlobalExceptionHandler
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception ex)
     {
+<<<<<<< HEAD
         ApiResponse<Void> response = new ApiResponse<>();
         response.setErrorCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
         response.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+=======
+        ErrorResponse errorResponse = new ErrorResponse(
+                ex.getMessage(),  
+                "The requested user does not exist ID"
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UsernameAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleUsernameAlreadyExists(UsernameAlreadyExistsException ex)
+    {
+        ErrorResponse errorResponse = new ErrorResponse(
+                ex.getMessage(),  
+                "tài khoản đã có sẵn"
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT); // 409 Conflict
+>>>>>>> b754e45f81780a65fab1444b4b6ac179803a8727
     }
 
 
