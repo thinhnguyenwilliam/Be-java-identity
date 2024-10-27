@@ -2,8 +2,8 @@ package com.example.identity_service.service.impl;
 
 import com.example.identity_service.dto.request.UserCreationRequest;
 import com.example.identity_service.dto.request.UserUpdateRequest;
-import com.example.identity_service.exception.UserNotFoundException;
-import com.example.identity_service.exception.UsernameAlreadyExistsException;
+import com.example.identity_service.enums.ErrorCode;
+import com.example.identity_service.exception.AppException;
 import com.example.identity_service.model.User;
 import com.example.identity_service.repository.UserRepository;
 import com.example.identity_service.service.IUserService;
@@ -12,7 +12,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 
@@ -31,9 +30,8 @@ public class UserServiceImpl implements IUserService
 
         if (userRepository.existsByUsername(request.getUsername()))
         {
-            throw new UsernameAlreadyExistsException(
-                    String.format("Username '%s' is already taken.", request.getUsername())
-            );
+            //throw new RuntimeException when don't know what error
+            throw new AppException(ErrorCode.USERNAME_ALREADY_EXISTS);
         }
 
 
@@ -50,7 +48,7 @@ public class UserServiceImpl implements IUserService
     @Override
     public User getUserById(UUID id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
     }
 
 
@@ -60,7 +58,7 @@ public class UserServiceImpl implements IUserService
     public User updateUser(UUID id, UserUpdateRequest request) {
         // Find user by ID, or throw exception if not found
         User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         // Update fields that are present in the request
         if (request.getPassword() != null) {
@@ -86,7 +84,7 @@ public class UserServiceImpl implements IUserService
         for (UUID id : ids)
         {
             User existingUser = userRepository.findById(id)
-                    .orElseThrow(() -> new UserNotFoundException(id));
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
             userRepository.delete(existingUser);
         }
     }

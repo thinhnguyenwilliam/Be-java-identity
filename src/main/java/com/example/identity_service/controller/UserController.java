@@ -2,10 +2,12 @@ package com.example.identity_service.controller;
 
 import com.example.identity_service.dto.request.UserCreationRequest;
 import com.example.identity_service.dto.request.UserUpdateRequest;
+import com.example.identity_service.dto.response.ApiResponse;
 import com.example.identity_service.model.User;
 import com.example.identity_service.service.IUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -23,10 +25,16 @@ public class UserController
 
 
     @PostMapping
-    public User createUser(@Valid @RequestBody UserCreationRequest request)
+    public ApiResponse<User> createUser(@Valid @RequestBody UserCreationRequest request)
     {
-        return userService.createUser(request);
+        return new ApiResponse<>(
+                "success",
+                "User created successfully",
+                userService.createUser(request)
+        );
     }
+
+
 
 
     @GetMapping

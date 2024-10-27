@@ -1,13 +1,14 @@
 package com.example.identity_service.advice;
 
-
-import com.example.identity_service.dto.response.ErrorResponse;
-import com.example.identity_service.exception.UserNotFoundException;
-import com.example.identity_service.exception.UsernameAlreadyExistsException;
+import com.example.identity_service.dto.response.ApiResponse;
+import com.example.identity_service.enums.ErrorCode;
+import com.example.identity_service.exception.AppException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,39 +16,45 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler
 {
-    // Handle UserNotFoundException
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException ex)
+    //RuntimeException
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception ex)
     {
-        ErrorResponse errorResponse = new ErrorResponse(
-                ex.getMessage(),  // The exception message from UserNotFoundException
-                "The requested user does not exist ID"
-        );
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(UsernameAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleUsernameAlreadyExists(UsernameAlreadyExistsException ex)
-    {
-        ErrorResponse errorResponse = new ErrorResponse(
-                ex.getMessage(),  // The exception message from UserNotFoundException
-                "tài khoản đã có sẵn"
-        );
-        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT); // 409 Conflict
+        ApiResponse<Void> response = new ApiResponse<>();
+        response.setErrorCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
+        response.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
 
+    // Handle AppException
+    @ExceptionHandler(AppException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAppException(AppException ex)
+    {
+        ApiResponse<Void> response = new ApiResponse<>();
+        response.setErrorCode(ex.getErrorCode().getCode());
+        response.setMessage(ex.getErrorCode().getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
 
 
-    // Add more exception handlers as needed
+    // Handle MethodArgumentNotValidException for validation errors
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex)
+    public ResponseEntity<ApiResponse<Void>> handleValidationExceptions(MethodArgumentNotValidException ex)
     {
         Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-                errors.put(error.getField(), error.getDefaultMessage())
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+            errors.put(error.getField(), error.getDefaultMessage());
+        }
+
+
+        ApiResponse<Void> errorResponse = new ApiResponse<>(
+                "error",
+                "Validation failed",
+                ErrorCode.VALIDATION_ERROR.getCode(),
+                errors
         );
-        return ResponseEntity.badRequest().body(errors);
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 }
