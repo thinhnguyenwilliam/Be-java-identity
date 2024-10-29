@@ -1,5 +1,6 @@
 package com.example.identity_service.service.impl;
 
+import com.example.identity_service.config.mappper.UserMapper;
 import com.example.identity_service.dto.request.UserCreationRequest;
 import com.example.identity_service.dto.request.UserUpdateRequest;
 import com.example.identity_service.enums.ErrorCode;
@@ -8,9 +9,9 @@ import com.example.identity_service.model.User;
 import com.example.identity_service.repository.UserRepository;
 import com.example.identity_service.service.IUserService;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,13 +21,24 @@ import java.util.UUID;
 public class UserServiceImpl implements IUserService
 {
     private final UserRepository userRepository;
-    private final ModelMapper modelMapper;
+    private final UserMapper userMapper;
+
 
 
 
     @Override
     public User createUser(UserCreationRequest request)
     {
+        // test @builder
+        UserCreationRequest request1 = UserCreationRequest.builder()
+                .username("john_doe_Thing")
+                .password("password123")
+                .firstName("John")
+                .dob(LocalDate.of(2000, 1, 1)) // Make sure the date is valid
+                .build();
+
+        System.out.println(request1);
+        // end test @builder
 
         if (userRepository.existsByUsername(request.getUsername()))
         {
@@ -35,8 +47,8 @@ public class UserServiceImpl implements IUserService
         }
 
 
-        // Map the UserCreationRequest DTO to the User entity
-        User user = modelMapper.map(request, User.class);
+
+        User user = userMapper.userCreationRequestToUser(request);
         return userRepository.save(user);
     }
 
@@ -60,19 +72,8 @@ public class UserServiceImpl implements IUserService
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        // Update fields that are present in the request
-        if (request.getPassword() != null) {
-            existingUser.setPassword(request.getPassword());
-        }
-        if (request.getFirstName() != null) {
-            existingUser.setFirstName(request.getFirstName());
-        }
-        if (request.getLastName() != null) {
-            existingUser.setLastName(request.getLastName());
-        }
-        if (request.getDob() != null) {
-            existingUser.setDob(request.getDob());
-        }
+        // Use MapStruct to update fields
+        userMapper.updateUserFromRequest(existingUser, request);
 
         // Save and return updated user
         return userRepository.save(existingUser);

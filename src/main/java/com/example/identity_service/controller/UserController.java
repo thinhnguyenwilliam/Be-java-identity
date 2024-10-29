@@ -54,7 +54,7 @@ public class UserController
 
 
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public User updateUser(
             @PathVariable UUID id,
             @Valid @RequestBody UserUpdateRequest request)
