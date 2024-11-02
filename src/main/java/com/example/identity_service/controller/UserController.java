@@ -3,6 +3,7 @@ package com.example.identity_service.controller;
 import com.example.identity_service.dto.request.UserCreationRequest;
 import com.example.identity_service.dto.request.UserUpdateRequest;
 import com.example.identity_service.dto.response.ApiResponse;
+import com.example.identity_service.dto.response.UserResponse;
 import com.example.identity_service.model.User;
 import com.example.identity_service.service.IUserService;
 import jakarta.validation.Valid;
@@ -45,7 +46,7 @@ public class UserController
 
 
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable UUID id)
+    public UserResponse getUserById(@PathVariable UUID id)
     {
         return userService.getUserById(id);
     }
@@ -55,7 +56,7 @@ public class UserController
 
 
     @PatchMapping("/{id}")
-    public User updateUser(
+    public UserResponse updateUser(
             @PathVariable UUID id,
             @Valid @RequestBody UserUpdateRequest request)
     {

@@ -10,7 +10,8 @@ public enum ErrorCode
     USERNAME_ALREADY_EXISTS(1002, "Username already exists"),
     INVALID_DOB(1003, "Date of birth is invalid"),
     VALIDATION_ERROR(1004, "Validation error"),
-    INTERNAL_SERVER_ERROR(5000, "Internal server error");
+    INTERNAL_SERVER_ERROR(5000, "Internal server error"),
+    INVALID_CREDENTIALS(5001,"Invalid credentials JWT" );
 
 
     private final int code;

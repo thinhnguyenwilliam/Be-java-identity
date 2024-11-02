@@ -20,7 +20,7 @@ public class User
     private String username;
 
 
-    private String password;
+    private String password;// Store the encoded password
     private String firstName;
     private String lastName;
     private LocalDate dob;
