@@ -8,13 +8,20 @@ import com.example.identity_service.model.User;
 import com.example.identity_service.service.IUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("api/users")
@@ -22,11 +29,22 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserController
 {
+    private static final Logger log = LoggerFactory.getLogger(UserController.class);  // Logger instance
     private final IUserService userService;
 
 
+    @GetMapping("/me")
+    public ApiResponse<UserResponse> getMyInfo() {
+        UserResponse userResponse = userService.getMyInfo();
+        return new ApiResponse<>(
+                "success",
+                "Fetched user info successfully",
+                userResponse
+        );
+    }
+
     @PostMapping
-    public ApiResponse<User> createUser(@Valid @RequestBody UserCreationRequest request)
+    public ApiResponse<UserResponse> createUser(@Valid @RequestBody UserCreationRequest request)
     {
         return new ApiResponse<>(
                 "success",
@@ -39,8 +57,24 @@ public class UserController
 
 
     @GetMapping
-    public List<User> getAllUsers()
+    public List<UserResponse> getAllUsers()
     {
+        // Get the currently authenticated user's username
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication != null ? authentication.getName() : null;
+
+
+        /// Retrieve roles (authorities) from the authentication object
+        assert authentication != null; // Ensure authentication is not null
+        String rolesString = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(", ")); // Join roles into a single string
+
+        // Log the currently logged-in user
+        log.info("Currently logged in user: {}", currentUsername); // Using placeholder for better performance
+        log.info("User roles: {}", rolesString); // Log roles
+
+
         return userService.getAllUsers();
     }
 

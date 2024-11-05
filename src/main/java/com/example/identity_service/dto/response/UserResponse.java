@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.util.Set;
 import java.util.UUID;
 
 import static lombok.AccessLevel.PRIVATE;// You can set the default access level
@@ -25,6 +26,7 @@ public class UserResponse
     String lastName;
     String fullName;
     LocalDate dob;
+    Set<String> roles;
 
     // Calculate fullName dynamically
     public String getFullName()

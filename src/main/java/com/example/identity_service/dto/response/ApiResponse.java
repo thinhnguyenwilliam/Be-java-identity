@@ -9,6 +9,8 @@ import java.util.Map;
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@NoArgsConstructor
+@AllArgsConstructor
 public class ApiResponse<T>
 {
     private String status;
@@ -18,7 +20,7 @@ public class ApiResponse<T>
     private Map<String, String> errors;
 
 
-    public ApiResponse() {}
+
 
 
     // Constructor for a successful response
@@ -37,6 +39,5 @@ public class ApiResponse<T>
         this.errorCode = errorCode;
         this.errors = errors;
     }
-
-
+    
 }

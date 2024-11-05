@@ -1,4 +1,6 @@
 package com.example.identity_service.components;
+import com.example.identity_service.enums.Role;
+import com.example.identity_service.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -6,7 +8,8 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
+import java.util.*;
+import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 import io.jsonwebtoken.JwtException;
 import org.slf4j.Logger;
@@ -28,15 +31,35 @@ public class JwtUtil
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    public String generateToken(String username) {
+
+
+
+    public String generateToken(User user) {
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(user.getUsername())
+                .claim("roles", user.getRoles().stream().map(Role::name).collect(Collectors.toList()))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration * 1000))
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
+
+
+    @SuppressWarnings("unchecked")
+    public Set<Role> getRolesFromToken(String token) {
+        Claims claims = getClaimsFromToken(token);
+        List<String> roles = claims.get("roles", List.class);
+        return roles.stream()
+                .map(Role::valueOf)
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * Verifies the given token.
+     * @param token The JWT token to verify.
+     * @return True if the token is valid, false otherwise.
+     */
     public Boolean verifyToken(String token) {
         try {
             Jwts.parserBuilder()
@@ -51,6 +74,13 @@ public class JwtUtil
         }
     }
 
+
+    /**
+     * Validates the token against the username and checks expiration.
+     * @param token The JWT token.
+     * @param username The username to validate against.
+     * @return True if valid, false otherwise.
+     */
     public Boolean validateToken(String token, String username) {
         String tokenUsername = getUsernameFromToken(token);
         return (tokenUsername.equals(username) && !isTokenExpired(token));

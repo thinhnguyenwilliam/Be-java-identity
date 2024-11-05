@@ -4,7 +4,9 @@ import com.example.identity_service.dto.response.ApiResponse;
 import com.example.identity_service.enums.ErrorCode;
 import com.example.identity_service.exception.AppException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -37,7 +39,24 @@ public class GlobalExceptionHandler
         ApiResponse<Void> response = new ApiResponse<>();
         response.setErrorCode(ex.getErrorCode().getCode());
         response.setMessage(ex.getErrorCode().getMessage());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+
+        // Dynamically retrieve HttpStatus from the ErrorCode
+        HttpStatusCode httpStatus = ex.getErrorCode().getHttpStatusCode();
+
+        return new ResponseEntity<>(response, httpStatus);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(AccessDeniedException ex)
+    {
+        ApiResponse<Void> response = new ApiResponse<>();
+        response.setErrorCode(ErrorCode.UNAUTHORIZED.getCode());
+        response.setMessage(ErrorCode.UNAUTHORIZED.getMessage());
+
+        // Dynamically retrieve HttpStatus from the ErrorCode
+        HttpStatusCode httpStatus = ErrorCode.UNAUTHORIZED.getHttpStatusCode();
+
+        return new ResponseEntity<>(response, httpStatus);
     }
 
 

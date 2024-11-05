@@ -38,7 +38,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService
         if (passwordEncoder.matches(request.getPassword(), user.getPassword()))
         {
             // Generate a JWT token
-            String token = jwtUtil.generateToken(user.getUsername());
+            String token = jwtUtil.generateToken(user);
 
             // Return the response with token and authentication status
             return AuthenticationResponse.builder()
